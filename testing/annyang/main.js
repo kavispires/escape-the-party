@@ -46,4 +46,5 @@ if (annyang) {
 var printResponse = function(answer) {
 	console.log(answer);
 	var node = `<li>${answer}</li>`
+	$app.append(node);
 }
