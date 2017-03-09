@@ -27,6 +27,7 @@ if (annyang) {
 }
 
 var printResponse = function(answer) {
+	console.log(answer);
 	var node = document.createElement('li');
 	var textNode = document.createTextNode(answer);
 	appHTML.appendChild(node);
