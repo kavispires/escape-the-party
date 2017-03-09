@@ -1,6 +1,6 @@
 'use strict';
 
-var appHTML = document.getElementById('app');
+var $app = $('#app');
 
 if (annyang) {
 
@@ -16,8 +16,25 @@ if (annyang) {
 		'roll': function() {
 			printResponse('Rolling dice...')
 		},
-		'move *direction': function(direction) {
-			printResponse('Moving ' + direction);
+		'bye': function() {
+			printResponse('Goodbye my friend!')
+		},
+		'exit': function() {
+			printResponse('You sucessfully left.')
+		},
+		'move :direction': function(direction) {
+			if (direction === 'up' || direction === 'down' || direction === 'left' || direction === 'right') {
+				printResponse(`Okay, I will move ${direction} direction`);
+			} else {
+				printResponse('I don\'t know this direction.');
+			}
+		},
+		'save *face': function(face) {
+			if (face === 'boot' || face === 'door' || face === 'hand' || face === 'courage') {
+				printResponse(`Saving 1 die: ${face}`);
+			} else {
+				printResponse('There\'s no such die face in this game');
+			}
 		}
 	}
 
@@ -28,7 +45,5 @@ if (annyang) {
 
 var printResponse = function(answer) {
 	console.log(answer);
-	var node = document.createElement('li');
-	var textNode = document.createTextNode(answer);
-	appHTML.appendChild(node);
+	var node = `<li>${answer}</li>`
 }
