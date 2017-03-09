@@ -32,6 +32,7 @@ Activate your microphone and use voice controls to control your character
 - 2 Dining Rooms (3 doors)
 - 1 Living Room (4 oposite doors)
 - 4 Bedrooms (2 L doors)
-- 1 Bathrooms (1 door) 
+- 1 Bathrooms (1 door)
+
 **Total**: 12 rooms
 
