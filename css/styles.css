@@ -1,0 +1,9 @@
+#app {
+	width: 810px;
+	height: 600px;
+	margin: 10px auto;
+}
+
+body {
+	background: pink;
+}
