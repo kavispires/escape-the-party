@@ -1,5 +1,24 @@
 'use strict';
 
+const utils = {
+	randomDiceFace() {
+		return this.randomNumber(5,1);
+	},
+	randomNumber(max, min = 0) {
+		return Math.floor(Math.random() * (max - min + 1)) + min;
+	},
+	findAvailableSlot(array, el = 1) {
+		for (let i = 0; i < array.length; i++) {
+			if (!array[i]) {
+				array[i] = el;
+				return i;
+			}
+		}
+		window.alert('No available slot.');
+		return 'No Available Slots.';
+	}
+};
+
 var GameInstance = function() {
 
 	this.game = new Phaser.Game(810, 600, Phaser.AUTO, 'app', { 
@@ -11,22 +30,30 @@ var GameInstance = function() {
 	this.pause = false;
 
 	// Game Header Information
+	this.header = {
+		level: null,
+		friends: null
+	};
+
 	this.currentLevel = {
 		level: 1,
-		time: 60,
+		time: 120,
 		friends: 1
 	};
 
 	this.timer = {
 		bar: null,
 		on: false,
-		size: 0
+		size: 0,
+		timer: null
 	};
 
 	this.player = null;
-	this.map = [];
 
 	this.dice = null;
+	this.safeSlots = [null, null, null, null];
+	this.safeSlotsPos = [19, 87, 155, 222]; // x positions
+	this.firstRoll = false;
 
 	// This object holds all states for voice commands triggered by annyang
 	this.voiceCommands = {
@@ -69,12 +96,18 @@ GameInstance.prototype.create = function() {
 	this.dice = this.game.add.group();
 	for (let i = 0; i < 5; i++) {
 		const die = this.dice.create(460 + i * 67, 523, 'die');
+		die.safe = false;
 	}
 	// Create header information (level, friends number)
-	this.game.add.text(16, 8, 'Level ' + this.currentLevel.level, { fontSize: '32px', fill: '#000'});
-	this.game.add.text(655, 8, 'Friends 0/' + this.currentLevel.friends, { fontSize: '32px', fill: '#000'});
+	this.header.level = this.game.add.text(16, 8, 'Level ' + this.currentLevel.level, { fontSize: '32px', fill: '#000'});
+	this.header.friends = this.game.add.text(655, 8, 'Friends 0/' + this.currentLevel.friends, { fontSize: '32px', fill: '#000'});
+	// Timer
 	this.timer.bar = this.game.add.sprite(277, 11, 'timer');
-	this.timer.bar.scale.setTo(1,1);
+	this.timer.bar.scale.setTo(0,1);
+	/*this.timer.timer = this.game.timer.create(false);
+	this.timer.timer.loop(1000, this.timer.update, this);
+	this.timer.timer.start();*/
+	console.log(this.dice);
 };
 
 GameInstance.prototype.update = function() {
@@ -96,7 +129,34 @@ GameInstance.prototype.update = function() {
 		this.player.x += 90;
 		this.voiceCommands.right = false;
 	}
+	// Handles the timer
+	if (this.timer.on) {
+		
+	}
+	// Dice roll
+	if (this.voiceCommands.roll) {
+		this.voiceCommands.roll = false;
+		// Randomize all non-saved dice faces
+		this.dice.children.forEach((die) => {
+			if (!die.safe)  {
+				die.frame = utils.randomDiceFace();
+				// If new die face is a 'shy', lock it.
+				if (die.frame === 3) { 
+					// Check next available slot on safeSlots array, move die to that slot, chante safe state to true
+					const slot = utils.findAvailableSlot(this.safeSlots);
+					console.log('SLOT', slot);
+					if (!isNaN(slot)) {
+						die.x = this.safeSlotsPos[slot];
+						die.safe = true;
+					}
+				}
+			}
+		});
+
+	}
 };
+
+
 
 // Start annyang voice commands
 if (annyang) {
@@ -110,11 +170,15 @@ if (annyang) {
 			console.log('Pause', newGame.pause);
 		},
 		'move :direction': function(direction) {
-			console.log('move', direction);
+			console.log('Moving:', direction);
 			if (direction === 'up' || direction === 'north') newGame.voiceCommands.up = true;
 			else if (direction === 'down' || direction === 'South') newGame.voiceCommands.down = true;
 			else if (direction === 'left' || direction === 'west') newGame.voiceCommands.left = true;
 			else if (direction === 'right' || direction === 'East') newGame.voiceCommands.right = true;
+		},
+		'roll': function() {
+			console.log('Rolling');
+			newGame.voiceCommands.roll = true;
 		}
 	};
 
