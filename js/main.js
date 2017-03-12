@@ -240,7 +240,7 @@ GameInstance.prototype.update = function() {
 	}
 };
 
-// Start annyang voice commands
+// Annyang voice commands
 if (annyang) {
 
 	var commands = {
@@ -280,5 +280,21 @@ if (annyang) {
 
 	annyang.start();
 }
+
+// Keyboard commands
+$(document).keyup(function(e) {
+	// Spacebar: Roll
+	if (e.keyCode === 32) newGame.voiceCommands.roll = true;
+	else if (e.keyCode === 38) newGame.voiceCommands.up = true;
+	else if (e.keyCode === 39) newGame.voiceCommands.right = true;
+	else if (e.keyCode === 40) newGame.voiceCommands.down = true;
+	else if (e.keyCode === 37) newGame.voiceCommands.left = true;
+	else if (e.keyCode === 49) newGame.voiceCommands.save = 1;
+	else if (e.keyCode === 50) newGame.voiceCommands.save = 2;
+	else if (e.keyCode === 51) newGame.voiceCommands.save = 3;
+	else if (e.keyCode === 52) newGame.voiceCommands.unsave = 1;
+	else if (e.keyCode === 53) newGame.voiceCommands.unsave = 2;
+	else if (e.keyCode === 54) newGame.voiceCommands.unsave = 3;
+});
 
 var newGame = new GameInstance();

@@ -1,9 +1,19 @@
+body {
+	background: pink;
+}
+
 #app {
 	width: 810px;
 	height: 600px;
 	margin: 10px auto;
 }
 
-body {
-	background: pink;
+#log {
+	background: #222;
+	margin: 10px auto;
+	width: 790px;
+	padding: 10px;
+	height: 100px;
+	overflow-y: auto;
+	color: #fff;
 }
