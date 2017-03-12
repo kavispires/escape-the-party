@@ -79,11 +79,14 @@ var GameInstance = function() {
 		left: false,
 		save: false,
 		roll: false,
-		unsave: false
+		unsave: false,
+		findRoom: false
 	};
 
 	this.sfx = {
-		diceroll: null
+		diceroll: null,
+		savedie: null,
+		unsavedie: null
 	};
 };
 
@@ -108,6 +111,8 @@ GameInstance.prototype.preload = function() {
 	this.game.load.image('timer', 'assets/time-bar.png');
 	// Load sfx
 	this.game.load.audio('diceroll', ['assets/sfx/dice-roll.mp3', 'assets/sfx/dice-roll.ogg']);
+	this.game.load.audio('savedie', ['assets/sfx/save-dice.mp3', 'assets/sfx/save-die.ogg']);
+	this.game.load.audio('unsavedie', ['assets/sfx/unsave-dice.mp3', 'assets/sfx/unsave-die.ogg']);
 };
 
 GameInstance.prototype.create = function() {
@@ -134,6 +139,8 @@ GameInstance.prototype.create = function() {
 	this.timer.timer.start();*/
 	// SFX
 	this.sfx.diceroll = this.game.add.audio('diceroll');
+	this.sfx.savedie = this.game.add.audio('savedie');
+	this.sfx.unsavedie = this.game.add.audio('unsavedie');
 };
 
 GameInstance.prototype.update = function() {
@@ -232,7 +239,8 @@ GameInstance.prototype.update = function() {
 				break;
 			}
 		}
-		if (!found) utils.print('Die not available for saving.');
+		if (!found) utils.print('Die not available for saving.')
+		else this.sfx.savedie.play();
 		this.voiceCommands.save = false;
 	}
 
@@ -251,6 +259,7 @@ GameInstance.prototype.update = function() {
 			}
 		}
 		if (!found) utils.print('Die not available for returning');
+		else this.sfx.unsavedie.play();
 		this.voiceCommands.unsave = false;
 	}
 };
@@ -312,4 +321,9 @@ $(document).keyup(function(e) {
 	else if (e.keyCode === 54) newGame.voiceCommands.unsave = 3;
 });
 
-var newGame = new GameInstance();
+let newGame;
+
+$(document).ready(function() {
+	newGame = new GameInstance();
+});
+
