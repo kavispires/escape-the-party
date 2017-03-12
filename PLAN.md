@@ -29,37 +29,39 @@ Level 3:
 - 2 friends
 
 # TO-DO
+GAME
+- Add Game timer
 ROLL
-- Roll voice commands [OK]
-- Dice roll [OK]
-- TT dice are locked [OK]
-- Dice can be saved [OK]
-- Dice can be unsaved [OK]
-- If no slots available to lock TT, place regular saved die back to tray. [OK]
+- [OK] Roll voice commands
+- [OK] Dice roll
+- [OK] TT dice are locked
+- [OK] Dice can be saved
+- [OK] Dice can be unsaved
+- [OK] If no slots available to lock TT, place regular saved die back to tray.
 - If 5 TT dice are locked, place the player back to the starting room.
-- Add rice roll sfx
+- [OK] Add dice roll, die save, die return sfx
 MAP
 - Create 4 level-1 maps
 ACTIONS
+- Find Room
+    [OK] + check if door is allowed
+    [OK] + check if dice is available in tray or safeSlots;
+    + show room (attach it to map);
+    [OK] + move used dice to tray and chance face to 'reroll';
+    [OK] + play door sfx;
 - Move
     + check if direction is allowed;
-    + check if dice is available in tray or safeSlots; 
-    + move character;
+    [OK] + check if dice is available in tray or safeSlots;
+    [OK] + move character;
     + update currentRoom;
-    + move used dice to tray and chance face to 'reroll';
-    + play steps sfx;
-- Find Room
-    + check if door is allowed
-    + check if dice is available in tray or safeSlots;
-    + show room (attach it to map);
-    + move used dice to tray and chance face to 'reroll';
-    + play door sfx;
+    [OK] + move used dice to tray and chance face to 'reroll';
+    [OK] + play steps sfx;
 - Say Bye
     + check if bye is allowed;
-    + check if dice is available in tray or safeSlots;
+    [OK] + check if dice is available in tray or safeSlots;
     + show 'bye' balloon speech;
-    + move used dice to tray and chance face to 'reroll';
-    + play bye sfx;
+    [OK] + move used dice to tray and chance face to 'reroll';
+    [OK] + play bye sfx;
 - Show Exit;
     + check if all friends were said bye
     + show/attach sfx
