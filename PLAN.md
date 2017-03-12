@@ -37,6 +37,7 @@ ROLL
 - Dice can be unsaved [OK]
 - If no slots available to lock TT, place regular saved die back to tray. [OK]
 - If 5 TT dice are locked, place the player back to the starting room.
+- Add rice roll sfx
 MAP
 - Create 4 level-1 maps
 ACTIONS
@@ -46,19 +47,19 @@ ACTIONS
     + move character;
     + update currentRoom;
     + move used dice to tray and chance face to 'reroll';
-    + play steps sound;
+    + play steps sfx;
 - Find Room
     + check if door is allowed
     + check if dice is available in tray or safeSlots;
     + show room (attach it to map);
     + move used dice to tray and chance face to 'reroll';
-    + play door sound;
+    + play door sfx;
 - Say Bye
     + check if bye is allowed;
     + check if dice is available in tray or safeSlots;
     + show 'bye' balloon speech;
     + move used dice to tray and chance face to 'reroll';
-    + play bye sound;
+    + play bye sfx;
 - Show Exit;
     + check if all friends were said bye
-    + show/attach exit
+    + show/attach sfx

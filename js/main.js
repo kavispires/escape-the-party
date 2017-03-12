@@ -60,11 +60,16 @@ var GameInstance = function() {
 		timer: null
 	};
 
+	// Player
 	this.player = null;
 
+	// Dice
 	this.dice = null;
 	this.tray = [];
 	this.safeSlots = [];
+
+	// Rooms
+	this.currentRoom = null; // Game starts as the current room
 
 	// This object holds all states for voice commands triggered by annyang
 	this.voiceCommands = {
@@ -75,6 +80,10 @@ var GameInstance = function() {
 		save: false,
 		roll: false,
 		unsave: false
+	};
+
+	this.sfx = {
+		diceroll: null
 	};
 };
 
@@ -97,6 +106,8 @@ GameInstance.prototype.preload = function() {
 	this.game.load.spritesheet('die', 'assets/die.png', 60, 60);
 	// Load time bar
 	this.game.load.image('timer', 'assets/time-bar.png');
+	// Load sfx
+	this.game.load.audio('diceroll', ['assets/sfx/dice-roll.mp3', 'assets/sfx/dice-roll.ogg']);
 };
 
 GameInstance.prototype.create = function() {
@@ -121,9 +132,13 @@ GameInstance.prototype.create = function() {
 	/*this.timer.timer = this.game.timer.create(false);
 	this.timer.timer.loop(1000, this.timer.update, this);
 	this.timer.timer.start();*/
+	// SFX
+	this.sfx.diceroll = this.game.add.audio('diceroll');
 };
 
 GameInstance.prototype.update = function() {
+	if (this.pause === true) return;
+
 	// Reposition every dice
 	this.tray.forEach((die, i) => {
 		die.x = 460 + i * 67;
@@ -131,8 +146,6 @@ GameInstance.prototype.update = function() {
 	this.safeSlots.forEach((die, i) => {
 		die.x = 19 + i * 67;
 	});
-
-	if (this.pause === true) return;
 
 	// Handles player movement
 	if (this.voiceCommands.up) {
@@ -154,11 +167,11 @@ GameInstance.prototype.update = function() {
 
 	// Handls dice roll
 	if (this.voiceCommands.roll) {
+		this.sfx.diceroll.play();
 		this.voiceCommands.roll = false;
 		// Randomize all non-saved dice faces
 		this.tray.forEach((die, index) => {
 			die.frame = utils.randomDieFace();
-			console.log(die.frame);
 		});
 		// Check for TT/Shy
 		for (let d = 0; d < this.tray.length; d++) {
@@ -177,7 +190,12 @@ GameInstance.prototype.update = function() {
 							break;
 						}
 					}
-					if (!regularDie) window.alert('GAME OVER'); //TO-DO: Return player to starting room
+					if (!regularDie) {
+						window.alert('GAME OVER'); //TO-DO: Return player to starting room
+						utils.print('GAME OVER');
+						this.pause = true;
+						break;
+					}
 				}
 				this.safeSlots.unshift(currentDie[0]);
 			}
@@ -198,14 +216,11 @@ GameInstance.prototype.update = function() {
 				}
 			}
 		}
-
-		console.log('TRAY', this.tray);
-		console.log('SAFE', this.safeSlots);
 	}
 
 	// Handles dice lock/save
 	if (this.voiceCommands.save) {
-		console.log('SAFE', this.voiceCommands.save);
+		utils.print('Saved dice ' + this.voiceCommands.save);
 		// Check if die is available to be saved
 		let found;
 		for (let i = 0; i < this.tray.length; i++) {
@@ -223,7 +238,7 @@ GameInstance.prototype.update = function() {
 
 	// Handles dice return to tray
 	if (this.voiceCommands.unsave) {
-		console.log('RETURN', this.voiceCommands.unsave);
+		utils.print('Returned dice ' + this.voiceCommands.unsave);
 		// Check if die is available to be returned
 		let found;
 		for (let i = 0; i < this.safeSlots.length; i++) {
@@ -252,24 +267,24 @@ if (annyang) {
 			utils.print('Pause', newGame.pause);
 		},
 		'move :direction': function(direction) {
-			utils.print('Moving: ' + direction);
+			console.log('Voice Command: Move ' + direction);
 			if (direction === 'up' || direction === 'north') newGame.voiceCommands.up = true;
 			else if (direction === 'down' || direction === 'South') newGame.voiceCommands.down = true;
 			else if (direction === 'left' || direction === 'west') newGame.voiceCommands.left = true;
 			else if (direction === 'right' || direction === 'East') newGame.voiceCommands.right = true;
 		},
 		'roll': function() {
-			utils.print('Rolling');
+			console.log('Voice Command: Roll');
 			newGame.voiceCommands.roll = true;
 		},
 		'save :face': function(face) {
-			utils.print('Saving: ' + face);
+			console.log('Voice Command: Save ' + face);
 			if (face === 'boot' || face === 'shoe' || face === 'foot' || face === 'shoes' || face === 'shoot') newGame.voiceCommands.save = 1;
 			if (face === 'hand' || face === 'glove' || face === 'him') newGame.voiceCommands.save = 2;
 			if (face === 'door') newGame.voiceCommands.save = 3;
 		},
 		'return :face': function(face) {
-			utils.print('Returning: ' + face);
+			console.log('Voice Command: Return ' + face);
 			if (face === 'boot' || face === 'shoe' || face === 'foot' || face === 'shoes' || face === 'shoot') newGame.voiceCommands.unsave = 1;
 			if (face === 'hand' || face === 'glove' || face === 'him') newGame.voiceCommands.unsave = 2;
 			if (face === 'door') newGame.voiceCommands.unsave = 3;
