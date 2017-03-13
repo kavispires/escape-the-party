@@ -29,6 +29,8 @@ body {
 	height: 100px;
 	overflow-y: auto;
 	color: #fff;
+	font-size: 85%;
+	list-style: none;
 }
 
 #instructions {
@@ -36,4 +38,9 @@ body {
 	width: 770px;
 	padding: 20px;
 	background: #fff;
+}
+
+.center {
+	text-align: center;
+	display: inline-block;
 }

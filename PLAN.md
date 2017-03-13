@@ -41,27 +41,27 @@ ROLL
 - If 5 TT dice are locked, place the player back to the starting room.
 - [OK] Add dice roll, die save, die return sfx
 MAP
-- Create 4 level-1 maps
+- Create Map randomizer (getRoom())
 ACTIONS
 - Find Room
     [OK] + check if door is allowed
     [OK] + check if dice is available in tray or safeSlots;
-    + show room (attach it to map);
+    [OK] + show room (attach it to map);
     [OK] + move used dice to tray and chance face to 'reroll';
     [OK] + play door sfx;
 - Move
     + check if direction is allowed;
     [OK] + check if dice is available in tray or safeSlots;
     [OK] + move character;
-    + update currentRoom;
+    [OK] + update currentRoom;
     [OK] + move used dice to tray and chance face to 'reroll';
     [OK] + play steps sfx;
 - Say Bye
-    + check if bye is allowed;
+    [OK] + check if bye is allowed;
     [OK] + check if dice is available in tray or safeSlots;
-    + show 'bye' balloon speech;
+    [OK] + show 'bye' balloon speech;
     [OK] + move used dice to tray and chance face to 'reroll';
     [OK] + play bye sfx;
 - Show Exit;
-    + check if all friends were said bye
-    + show/attach sfx
+    [OK] + check if all friends were said bye
+    [OK] + show/attach sfx
