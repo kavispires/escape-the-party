@@ -106,6 +106,7 @@ var GameInstance = function() {
 
 	this.currentLevel = {};
 
+	// TO-DO: Implement timer
 	this.timer = {
 		bar: null,
 		on: false,
@@ -230,6 +231,7 @@ var GameInstance = function() {
 	};
 
 	this.hasDiceAvailable = function(face, quantity = 2) {
+		// TO-DO: Use saved dice before dice on tray
 		/*// Look for faces in safeSlots
 		let safeFinds = [];
 		for (let i = 0; i < this.safeSlots.length; i++) {
