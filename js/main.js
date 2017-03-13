@@ -4,6 +4,7 @@ const utils = {
 	randomDieFace() {
 		let rand = this.randomNumber(6,1);
 		if (rand === 6) rand = 1; // since there are 2 shoes, if second is chosen, reasign to 1
+		if (rand === 5) return this.randomDieFace(); // TO-DO REMOVE
 		return rand;
 	},
 	randomNumber(max, min = 0) {
@@ -29,8 +30,10 @@ const utils = {
 		console.log(message);
 		$('#log').prepend(`<li>${message}</li>`);
 	},
+	getRandomElement(array) {
+		return array[Math.floor(Math.random() * array.length)]
+	},
 	totalAvailableDoors(room) {
-		const totalDoors = room.doors.reduce((a,b) => a + b, 0);
 		let totalConnections = 0;
 		if (room.connections) {
 			if (room.connections.top) totalConnections--;
@@ -38,7 +41,43 @@ const utils = {
 			if (room.connections.bottom) totalConnections--;
 			if (room.connections.right) totalConnections--;
 		}
-		return totalDoors + totalConnections;
+		return room.numDoors + totalConnections;
+	},
+	getRoom(name) {
+		return ROOMS.find((room)=> room.name = name);
+	},
+	getOppositeDirection(direction) {
+		// Get oppose direction
+		direction = direction + 2;
+		if (direction > 3) direction = direction - 4;
+		return direction;
+	},
+	getCoordinates(array, direction) {
+		let newArray = [...array];
+		if (direction === 0) newArray[1] = newArray[1] - 1;
+		if (direction === 1) newArray[0] = newArray[0] + 1;
+		if (direction === 2) newArray[1] = newArray[1] + 1;
+		if (direction === 3) newArray[0] = newArray[0] - 1;
+		return newArray;
+	},
+	getRandomRoom(direction, maxNumDoors, exception) {
+		 direction = this.getOppositeDirection(direction);
+
+		let room;
+		let done;
+		while (!done) {
+			room = this.getRandomElement(ROOMS);
+			if (!room.special) {
+				if (room.doors[direction]) {
+					if(maxNumDoors) {
+						if (room.numDoors === maxNumDoors) done = 1;
+					} else {
+						done = 1;
+					}
+				}
+			}
+		}
+		return room;
 	}
 };
 
@@ -58,11 +97,7 @@ var GameInstance = function() {
 		friends: null
 	};
 
-	this.currentLevel = {
-		level: 1,
-		time: 120,
-		friends: 1
-	};
+	this.currentLevel = {};
 
 	this.timer = {
 		bar: null,
@@ -75,13 +110,14 @@ var GameInstance = function() {
 	this.player = null;
 
 	// Dice
-	this.dice = null;
 	this.tray = [];
 	this.safeSlots = [];
 
 	// Rooms
+	this.roomsGrid = [];
 	this.rooms = [];
-	this.currentRoom = null; // Game starts as the current room
+	this.currentRoom = null;
+	this.numAvailableDoorsInGame = 1;
 
 	// This object holds all states for voice commands triggered by annyang
 	this.voiceCommands = {
@@ -103,6 +139,81 @@ var GameInstance = function() {
 		walk: null,
 		opendoor: null,
 		friendbye: null
+	};
+
+	this.getLevel = function(num) {
+		this.currentLevel = LEVELS.find((level)=> level.level === num);
+	};
+
+	this.addRoom = function(hasDice) {
+		debugger;
+		// Find a door in the currentRoom to add a newRoom (check door position, check connections array, check gameGrid);
+		let possible = [];
+		for (let i = 0; i < this.currentRoom.doors.length; i++) {
+			let a = this.currentRoom.doors[i];
+			let b = this.currentRoom.connections[i];
+			if (this.currentRoom.doors[i] && !this.currentRoom.connections[i]) {
+				// Check if there is already a room in that grid position
+				let currentCoords = +`${this.currentRoom.coords[0]}${this.currentRoom.coords[1]}`;
+				if (i === 0) currentCoords -= 1;
+				else if (i === 1) currentCoords += 10;
+				else if (i === 2) currentCoords += 1;
+				else if (i === 3) currentCoords -= 10;
+				
+				if (this.roomsGrid.indexOf(currentCoords) === -1) {
+					// Free to add a room here
+					possible.push(i);
+				}
+				else console.log('Grid taken; finding other...');
+			}
+		}
+		console.log(`Found ${possible.length} doors with no rooms attached.`);
+
+		// If it is possible to add a room within the rules
+		if (possible.length > 0) {
+			let direction = utils.getRandomElement(possible);
+
+			let newRoom;
+			// If there is more than 2 numAvailableDoorsInGame, find 1 door room.
+			if (this.numAvailableDoorsInGame > 2) {
+				newRoom = utils.getRandomRoom(direction, 1);
+			} else {
+				newRoom = utils.getRandomRoom(direction);
+			}
+			// If the currentLevel.doors is reached, add a friend
+			if (this.currentLevel.rooms === this.rooms.length - 1) {
+				newRoom.friend = true;	
+			}
+			// Update numAvailableDoorsInGame
+			this.numAvailableDoorsInGame += newRoom.numDoors - 2;
+			// Create this new room
+			newRoom.coords = utils.getCoordinates(this.currentRoom.coords, direction);
+			const drawRoom = this.game.add.sprite(newRoom.coords[0] * 90, newRoom.coords[1] * 90 + 45, `room-${newRoom.name}`);
+			newRoom = Object.assign(drawRoom, newRoom);
+			
+			// Add associations
+			this.currentRoom.connections[direction] = newRoom;
+			direction = utils.getOppositeDirection(direction);
+			newRoom.connections[direction] = this.currentRoom;
+
+			this.roomsGrid.push(+`${newRoom.coords[0]}${newRoom.coords[1]}`);
+			this.rooms.push(newRoom);
+			this.useDiceForAction(hasDice[1], hasDice[2]);
+			utils.print('You found a new room!');
+		}
+		else {
+			utils.print('You cannot find a room here.');
+		}
+
+	};
+
+	this.createNewRoom = function(roomName, x, y) {
+		// Add Starting room
+		const newRoomDB = ROOMS.find((room)=> room.name = roomName);
+		this.numAvailableDoorsInGame += newRoomDB.numDoors - 1;
+		let newRoom = this.game.add.sprite(x * 90, y * 90 + 45, `room-${newRoomDB.name}`);
+		newRoom.coords = [x,y];
+		return Object.assign(newRoom, newRoomDB);
 	};
 
 	this.hasDiceAvailable = function(face, quantity = 2) {
@@ -184,10 +295,12 @@ GameInstance.prototype.preload = function() {
 GameInstance.prototype.create = function() {
 	// Set up background
 	this.game.add.sprite(0,0, 'background');
+	// Set up level
+	this.getLevel(1);
 	// Add Starting room
-	const startingRoom = this.game.add.sprite(359.5, 224.5, 'room-start');
-	startingRoom.doors = [0, 1, 0, 1]; // T, R, B, L
-	this.rooms.push(startingRoom);
+	let newRoom = this.createNewRoom('start', 4, 2);
+	this.roomsGrid.push(+`${newRoom.coords[0]}${newRoom.coords[1]}`);
+	this.rooms.push(newRoom);
 	this.currentRoom = this.rooms[0];
 	// Add player sprite
 	this.player = this.game.add.sprite(359.5, 224.5, 'player');
@@ -232,28 +345,41 @@ GameInstance.prototype.update = function() {
 	if (this.voiceCommands.up || this.voiceCommands.down || this.voiceCommands.left || this.voiceCommands.right) {
 		let hasDice = this.hasDiceAvailable(1);
 		if (hasDice[0]) {
-			this.sfx.walk.play();
+			let done;
 			// Handles Move Up
 			if (this.voiceCommands.up) {
-				// TO-DO Check if player can be moved
-				this.useDiceForAction(hasDice[1], hasDice[2]);
-				this.player.y -= 90;
+				if (this.currentRoom.connections[0]) {
+					this.player.y -= 90;
+					this.currentRoom = this.currentRoom.connections[0];
+					done = true;
+				}
 			}
 			else if (this.voiceCommands.down) {
-				// TO-DO Check if player can be moved
-				this.useDiceForAction(hasDice[1], hasDice[2]);
-				this.player.y += 90;
+				if (this.currentRoom.connections[2]) {
+					this.player.y += 90;
+					this.currentRoom = this.currentRoom.connections[2];
+					done = true;
+				}
 			}
 			else if (this.voiceCommands.left) {
-				// TO-DO Check if player can be moved
-				this.useDiceForAction(hasDice[1], hasDice[2]);
-				this.player.x -= 90;
+				if (this.currentRoom.connections[3]) {
+					this.player.x -= 90;
+					this.currentRoom = this.currentRoom.connections[3];
+					done = true;
+				}
 			}
 			else if (this.voiceCommands.right) {
-				// TO-DO Check if player can be moved
-				this.useDiceForAction(hasDice[1], hasDice[2]);
-				this.player.x += 90;
+				if (this.currentRoom.connections[1]) {
+					this.player.x += 90;
+					this.currentRoom = this.currentRoom.connections[1];
+					done = true;
+				}
 			}
+			if (done) {
+				this.sfx.walk.play();
+				this.useDiceForAction(hasDice[1], hasDice[2]);
+			}
+			else utils.print('You can\'t walk that way.');
 		}
 		this.voiceCommands.up = false;
 		this.voiceCommands.down = false;
@@ -360,9 +486,8 @@ GameInstance.prototype.update = function() {
 			// Check if player has 2 door dice available
 			let hasDice = this.hasDiceAvailable(3);
 			if (hasDice[0]) {
-				this.useDiceForAction(hasDice[1], hasDice[2]);
-				// TO-DO: Add new room to game	
-				utils.print('You found a new room!');
+				// Add new room to game
+				this.addRoom(hasDice);
 				// Play sfx
 				this.sfx.opendoor.play();
 			}
@@ -382,6 +507,8 @@ GameInstance.prototype.update = function() {
 				this.useDiceForAction(hasDice[1], hasDice[2]);
 				// TO-DO: Update number of friends to say goodbye
 
+				// TO-DO: If complete all currentLevel.friends, show exit room.
+
 				utils.print('Your friend is glad to see you.');
 				// Play sfx
 				this.sfx.friendbye.play();
@@ -390,6 +517,9 @@ GameInstance.prototype.update = function() {
 		}
 		else utils.print('There is no friend in this room to say good-bye.');
 	}
+
+	// Always leave player on top.
+	this.game.world.bringToTop(this.player);
 };
 
 // Annyang voice commands
