@@ -183,7 +183,7 @@ var GameInstance = function() {
 
 			let newRoom;
 			// If there is more than 2 numAvailableDoorsInGame, find 1 door room.
-			if (this.numAvailableDoorsInGame > 2) {
+			if (this.numAvailableDoorsInGame > 3) {
 				newRoom = utils.getRandomRoom(direction, 1);
 			} else {
 				newRoom = utils.getRandomRoom(direction);
@@ -428,7 +428,7 @@ GameInstance.prototype.update = function() {
 		// Check for TT/Shy
 		for (let d = 0; d < this.tray.length; d++) {
 			if (this.tray[d].frame === 5) {
-				utils.print('Got T_T');
+				utils.print('You rolled T_T . Got shy! Die locked.');
 				const currentDie = this.tray.splice(d, 1);
 				d--;
 				// If there are still available slots on safeSlots array, add it
@@ -609,9 +609,9 @@ if (annyang) {
 		},
 		'save :face': function(face) {
 			console.log('Voice Command: Save ' + face);
-			if (face === 'boot' || face === 'shoe' || face === 'foot' || face === 'shoes' || face === 'shoot') newGame.voiceCommands.save = 1;
-			if (face === 'hand' || face === 'glove' || face === 'him') newGame.voiceCommands.save = 2;
-			if (face === 'door') newGame.voiceCommands.save = 3;
+			if (face === 'boot' || face === 'shoe' || face === 'foot' || face === 'shoes' || face === 'shoot' || face === 'green') newGame.voiceCommands.save = 1;
+			if (face === 'hand' || face === 'glove' || face === 'him' || face === 'orange' || face === 'yellow') newGame.voiceCommands.save = 2;
+			if (face === 'door'  || face === 'red'  || face === 'brown') newGame.voiceCommands.save = 3;
 		},
 		'return :face': function(face) {
 			console.log('Voice Command: Return ' + face);
@@ -625,6 +625,11 @@ if (annyang) {
 		}
 		,
 		'bye': function() {
+			console.log('Voice Command: Bye');
+			newGame.voiceCommands.sayBye = true;
+		},
+
+		'good bye': function() {
 			console.log('Voice Command: Bye');
 			newGame.voiceCommands.sayBye = true;
 		}
