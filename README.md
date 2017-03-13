@@ -1,6 +1,6 @@
 # ESCAPE THE PARTY!
 
-You are in a party and wants to go home, but you are too polite to leave without saying goodbye to your friends.
+You are in a party and want to go home, but you are too polite to leave without saying goodbye to your friends.
 
 Within X minutes you have to **roll** dice to **move** from room to room, find your Y friends, say **bye**, then find the **exit** before that tv show you are addicted to begins.
 
@@ -8,8 +8,10 @@ Within X minutes you have to **roll** dice to **move** from room to room, find y
 - Move: you need 2 boots to move.
 - Find Room: you need 2 doors to find a new room.
 - Say Bye: you need 2 hands per friend. If two friends are in the same room, you need 4 hands at the same time.
-- Shyness: your die is locked, you will need to roll...
-- Courage: you can unlock one shiness
+
+## Automatic Actions
+- Shyness/TT: your die is locked, you will need to roll...
+- Courage/Crown: you can unlock one shiness
 
 ## Controls
 

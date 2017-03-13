@@ -4,7 +4,7 @@ const utils = {
 	randomDieFace() {
 		let rand = this.randomNumber(6,1);
 		if (rand === 6) rand = 1; // since there are 2 shoes, if second is chosen, reasign to 1
-		if (rand === 5) return this.randomDieFace(); // TO-DO REMOVE
+		// if (rand === 5) return this.randomDieFace(); // DEV: avoid TT
 		return rand;
 	},
 	randomNumber(max, min = 0) {
@@ -354,8 +354,6 @@ GameInstance.prototype.create = function() {
 	this.sfx.walk = this.game.add.audio('walk');
 	this.sfx.opendoor = this.game.add.audio('opendoor');
 	this.sfx.friendbye = this.game.add.audio('friendbye');
-
-	console.log(this.currentRoom);
 };
 
 GameInstance.prototype.update = function() {
@@ -542,7 +540,7 @@ GameInstance.prototype.update = function() {
 				this.successfulByes++;
 				// Update text
 				this.header.friends.setText(`Friends ${this.successfulByes}/${this.currentLevel.friends}`);
-				// TO-DO: If complete all currentLevel.friends, show exit room.
+				// If complete all currentLevel.friends, show exit room.
 				if (this.currentLevel.friends === this.successfulByes) {
 					// Go through rooms array, find a room that has a open door slot, place the exit there.
 					let roomToExit;
@@ -641,6 +639,7 @@ if (annyang) {
 $(document).keyup(function(e) {
 	// Spacebar: Roll
 	if (e.keyCode === 32) newGame.voiceCommands.roll = true; // Spacebar
+	else if (e.keyCode === 82) newGame.voiceCommands.roll = true; // R
 	else if (e.keyCode === 38) newGame.voiceCommands.up = true;
 	else if (e.keyCode === 39) newGame.voiceCommands.right = true;
 	else if (e.keyCode === 40) newGame.voiceCommands.down = true;

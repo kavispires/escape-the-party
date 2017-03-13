@@ -1,5 +1,18 @@
 body {
-	background: pink;
+	background: #BABABA;
+}
+
+* {
+	font-family: sans-serif;
+}
+
+.container {
+	margin: 0 auto;
+}
+
+#logo {
+	margin: 0 auto;
+	display: block;
 }
 
 #app {
@@ -16,4 +29,11 @@ body {
 	height: 100px;
 	overflow-y: auto;
 	color: #fff;
+}
+
+#instructions {
+	margin: 0 auto;
+	width: 770px;
+	padding: 20px;
+	background: #fff;
 }
