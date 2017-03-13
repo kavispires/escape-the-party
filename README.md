@@ -1,5 +1,7 @@
 # ESCAPE THE PARTY!
 
+Live version: [http://www.kavispires.com/escape-the-party/](http://www.kavispires.com/escape-the-party/)
+
 You are in a party and want to go home, but you are too polite to leave without saying goodbye to your friends.
 
 Within X minutes you have to **roll** dice to **move** from room to room, find your Y friends, say **bye**, then find the **exit** before that tv show you are addicted to begins.
