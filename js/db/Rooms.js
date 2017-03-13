@@ -4,27 +4,27 @@ const ROOMS = [
 	{
 		name: 'start',
 		doors: [0,1,0,1],
-		special: true
+		special: 'start'
 	},
 	{
 		name: 'exit-t',
 		doors: [1,0,0,0],
-		special: true
+		special: 'exit'
 	},
 	{
 		name: 'exit-r',
 		doors: [0,1,0,0],
-		special: true
+		special: 'exit'
 	},
 	{
 		name: 'exit-b',
 		doors: [0,0,1,0],
-		special: true
+		special: 'exit'
 	},
 	{
 		name: 'exit-l',
 		doors: [0,0,0,1],
-		special: true
+		special: 'exit'
 	},
 	{
 		name: '1door-t',

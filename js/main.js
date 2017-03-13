@@ -78,6 +78,13 @@ const utils = {
 			}
 		}
 		return room;
+	},
+	getExit(direction) {
+		direction = this.getOppositeDirection(direction);
+
+		return ROOMS.find((rm) => {
+			return rm.special === 'exit' && rm.doors[direction] === 1;
+		});
 	}
 };
 
@@ -108,6 +115,8 @@ var GameInstance = function() {
 
 	// Player
 	this.player = null;
+	this.friend = null;
+	this.successfulByes = 0;
 
 	// Dice
 	this.tray = [];
@@ -146,7 +155,6 @@ var GameInstance = function() {
 	};
 
 	this.addRoom = function(hasDice) {
-		debugger;
 		// Find a door in the currentRoom to add a newRoom (check door position, check connections array, check gameGrid);
 		let possible = [];
 		for (let i = 0; i < this.currentRoom.doors.length; i++) {
@@ -180,9 +188,9 @@ var GameInstance = function() {
 			} else {
 				newRoom = utils.getRandomRoom(direction);
 			}
-			// If the currentLevel.doors is reached, add a friend
-			if (this.currentLevel.rooms === this.rooms.length - 1) {
-				newRoom.friend = true;	
+			// If the currentLevel.doors is reached, add the friend
+			if (this.currentLevel.rooms === this.rooms.length) {
+				newRoom.friend = true;
 			}
 			// Update numAvailableDoorsInGame
 			this.numAvailableDoorsInGame += newRoom.numDoors - 2;
@@ -199,7 +207,12 @@ var GameInstance = function() {
 			this.roomsGrid.push(+`${newRoom.coords[0]}${newRoom.coords[1]}`);
 			this.rooms.push(newRoom);
 			this.useDiceForAction(hasDice[1], hasDice[2]);
-			utils.print('You found a new room!');
+			
+			if (newRoom.friend) {
+				this.friend = this.game.add.sprite(newRoom.coords[0] * 90, newRoom.coords[1] * 90 + 45, 'friend');
+				utils.print('You found a new room and a friend!');
+			}
+			else utils.print('You found a new room!');
 		}
 		else {
 			utils.print('You cannot find a room here.');
@@ -217,6 +230,21 @@ var GameInstance = function() {
 	};
 
 	this.hasDiceAvailable = function(face, quantity = 2) {
+		/*// Look for faces in safeSlots
+		let safeFinds = [];
+		for (let i = 0; i < this.safeSlots.length; i++) {
+			if (this.safeSlots[i].frame === face) safeFinds.push(i);
+			if (safeFinds.length === quantity) break;
+		}
+
+		let trayFinds = [];
+		if (safeFinds.length < quantity) {
+			for (let i = 0; i < this.tray.length; i++) {
+				if (this.tray[i].frame === face) trayFinds.push(i);
+				if (trayFinds.length === quantity) break;
+			}
+		}*/
+
 		// Look for faces in tray
 		let trayFinds = [];
 		for (let i = 0; i < this.tray.length; i++) {
@@ -378,6 +406,10 @@ GameInstance.prototype.update = function() {
 			if (done) {
 				this.sfx.walk.play();
 				this.useDiceForAction(hasDice[1], hasDice[2]);
+				if (this.currentRoom.exit) {
+					window.alert('YOU WIN!');
+					utils.print('YOU WIN!');
+				}
 			}
 			else utils.print('You can\'t walk that way.');
 		}
@@ -498,6 +530,7 @@ GameInstance.prototype.update = function() {
 
 	// Handles find new rooms
 	if (this.voiceCommands.sayBye) {
+		// debugger;
 		this.voiceCommands.sayBye = false;
 		// Check if friend is in the room
 		if (this.currentRoom.friend) {
@@ -505,10 +538,42 @@ GameInstance.prototype.update = function() {
 			let hasDice = this.hasDiceAvailable(2);
 			if (hasDice[0]) {
 				this.useDiceForAction(hasDice[1], hasDice[2]);
-				// TO-DO: Update number of friends to say goodbye
-
+				// Update number of friends to say goodbye
+				this.successfulByes++;
+				// Update text
+				this.header.friends.setText(`Friends ${this.successfulByes}/${this.currentLevel.friends}`);
 				// TO-DO: If complete all currentLevel.friends, show exit room.
+				if (this.currentLevel.friends === this.successfulByes) {
+					// Go through rooms array, find a room that has a open door slot, place the exit there.
+					let roomToExit;
+					let i = 0;
+					while (!roomToExit) {
+						for (let j = 0; j < this.rooms[i].doors.length; j++) {
+							if (this.rooms[i].doors[j] && !this.rooms[i].connections[j]) {
+								// Attatch appropriate exit
+								roomToExit = this.rooms[i];
+								let direction = j;
+								let newExit = utils.getExit(direction);
+								// Update numAvailableDoorsInGame
+								this.numAvailableDoorsInGame--;
+								// Create this new room
+								newExit.coords = utils.getCoordinates(roomToExit.coords, direction);
+								newExit.exit = true;
+								const drawRoom = this.game.add.sprite(newExit.coords[0] * 90, newExit.coords[1] * 90 + 45, `room-${newExit.name}`);
+								newExit = Object.assign(drawRoom, newExit);
+								
+								// Add associations
+								this.rooms[i].connections[direction] = newExit;
+								direction = utils.getOppositeDirection(direction);
+								newExit.connections[direction] = this.rooms[i];
 
+								this.roomsGrid.push(+`${newExit.coords[0]}${newExit.coords[1]}`);
+								this.rooms.push(newExit);
+							}
+						}
+						i++;
+					}
+				}
 				utils.print('Your friend is glad to see you.');
 				// Play sfx
 				this.sfx.friendbye.play();
@@ -587,7 +652,7 @@ $(document).keyup(function(e) {
 	else if (e.keyCode === 53) newGame.voiceCommands.unsave = 2; // 5
 	else if (e.keyCode === 54) newGame.voiceCommands.unsave = 3; // 6
 	else if (e.keyCode === 70) newGame.voiceCommands.findRoom = true; // F
-	else if (e.keyCode === 70) newGame.voiceCommands.findRoom = true; // B
+	else if (e.keyCode === 66) newGame.voiceCommands.sayBye = true; // B
 });
 
 let newGame;
